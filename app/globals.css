@@ -128,3 +128,7 @@
     @apply font-sans;
   }
 }
+
+@theme {
+  --background-image-home: url(/images/home-bg.webp);
+}
