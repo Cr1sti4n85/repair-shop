@@ -1,4 +1,6 @@
-import React from "react";
+export const metadata = {
+  title: "Clientes",
+};
 
 const Customers = () => {
   return <div>Customers</div>;
