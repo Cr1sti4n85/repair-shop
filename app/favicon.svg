@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Fondo opcional (puedes quitarlo si quieres transparente) -->
+  <rect width="64" height="64" rx="12" fill="#0f172a"/>
+  
+  <!-- Laptop base -->
+  <rect x="12" y="18" width="40" height="22" rx="3" fill="#e2e8f0"/>
+  <rect x="8" y="42" width="48" height="4" rx="2" fill="#94a3b8"/>
+  
+  <!-- Pantalla -->
+  <rect x="16" y="22" width="32" height="14" rx="2" fill="#0f172a"/>
+  
+  <!-- Engranaje simple -->
+  <g transform="translate(42,18) scale(0.6)">
+    <circle cx="10" cy="10" r="4" fill="#38bdf8"/>
+    <path fill="#38bdf8" d="
+      M10 0 L12 3 L16 3 L17 7 L20 10 L17 13 L16 17 L12 17 L10 20
+      L8 17 L4 17 L3 13 L0 10 L3 7 L4 3 L8 3 Z
+    "/>
+  </g>
+</svg>

@@ -24,7 +24,7 @@ const NavButton = ({ icon: Icon, label, href }: Props) => {
         title={label}
         className={buttonClass}
       >
-        <Icon className="size-6" />
+        <Icon className="size-5" />
       </Link>
     );
   }
