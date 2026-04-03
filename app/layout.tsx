@@ -24,6 +24,9 @@ export const metadata: Metadata = {
   description:
     "Tienda especializada en mantenimiento preventivo y correctivo a eqiupos tecnológicos.",
   applicationName: "Repair Tech",
+  icons: {
+    icon: "./favicon.svg",
+  },
 };
 
 export default function RootLayout({
