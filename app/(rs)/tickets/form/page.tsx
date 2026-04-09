@@ -2,6 +2,7 @@ import BackButton from "@/components/BackButton";
 import { getCustomer } from "@/lib/queries/getCustomer";
 import { getTicket } from "@/lib/queries/getTicket";
 import * as Sentry from "@sentry/nextjs";
+import TicketForm from "./_components/TicketForm";
 
 const TicketFormPage = async ({
   searchParams,
@@ -61,13 +62,12 @@ const TicketFormPage = async ({
         </>
       );
     }
-    //TODO return ticket form
-    return <div>RENDERS NEW TICKET FORM</div>;
+    return <TicketForm customer={customer} />;
   }
 
   //Edit ticket
   if (ticketId) {
-    if (!ticket) {
+    if (!ticket || !customerWithTicket) {
       return (
         <>
           <h2 className="text-2xl mb-2">Ticket #{ticketId} no encontrado</h2>
@@ -75,8 +75,7 @@ const TicketFormPage = async ({
         </>
       );
     }
-    //TODO return edit ticket form
-    return <div>RENDERS EDIT TICKET FORM</div>;
+    return <TicketForm customer={customerWithTicket} ticket={ticket} />;
   }
 };
 
