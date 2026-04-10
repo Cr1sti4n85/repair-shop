@@ -7,14 +7,12 @@ import {
 import { Checkbox } from "../ui/checkbox";
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
   FieldLegend,
   FieldSet,
 } from "../ui/field";
-import { regionsArray } from "@/constants/regionsArray";
 
 type Props<
   TFieldValues extends FieldValues,
@@ -37,6 +35,7 @@ const CheckBoxInput = <
   label,
   className,
   message,
+  disabled = false,
 }: Props<TFieldValues, TName>) => {
   return (
     <FieldSet className="w-full flex items-center gap-2">
@@ -50,6 +49,7 @@ const CheckBoxInput = <
             name={field.name}
             checked={field.value}
             onCheckedChange={field.onChange}
+            disabled={disabled}
           />
           <FieldLabel htmlFor="form-checkbox" className="font-normal">
             {message}

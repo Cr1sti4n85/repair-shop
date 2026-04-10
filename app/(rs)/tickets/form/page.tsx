@@ -1,8 +1,23 @@
+import * as Sentry from "@sentry/nextjs";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { Users, init as kindeInit } from "@kinde/management-api-js";
 import BackButton from "@/components/BackButton";
 import { getCustomer } from "@/lib/queries/getCustomer";
 import { getTicket } from "@/lib/queries/getTicket";
-import * as Sentry from "@sentry/nextjs";
 import TicketForm from "./_components/TicketForm";
+import { KindeUser } from "@kinde-oss/kinde-auth-nextjs";
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+}) {
+  const { customerId, ticketId } = await searchParams;
+  if (!customerId && !ticketId)
+    return { title: "Falta Id de cliente o de ticket" };
+  if (customerId) return { title: `Nuevo ticket para cliente #${customerId}` };
+  return { title: `Editar ticket #${ticketId}` };
+}
 
 const TicketFormPage = async ({
   searchParams,
@@ -13,8 +28,31 @@ const TicketFormPage = async ({
   let customer = null;
   let ticket = null;
   let customerWithTicket = null;
+  let isManager: boolean | undefined = false;
+  let currentUser: KindeUser<Record<string, unknown>> | null = null;
+  let techs: { id: string; description: string }[] = [];
+  const { getPermission, getUser } = getKindeServerSession();
 
   try {
+    if (customerId || ticketId) {
+      const [managerPermission, user] = await Promise.all([
+        getPermission("manager"),
+        getUser(),
+      ]);
+      isManager = managerPermission?.isGranted;
+      currentUser = user;
+      if (isManager) {
+        kindeInit();
+        const { users } = await Users.getUsers();
+        techs = users
+          ? users.map((user) => ({
+              id: user.email!,
+              description: user.email!,
+            }))
+          : [];
+      }
+    }
+
     if (customerId) {
       customer = await getCustomer(parseInt(customerId));
     }
@@ -62,7 +100,11 @@ const TicketFormPage = async ({
         </>
       );
     }
-    return <TicketForm customer={customer} />;
+    if (isManager) {
+      return <TicketForm customer={customer} techs={techs} />;
+    } else {
+      return <TicketForm customer={customer} />;
+    }
   }
 
   //Edit ticket
@@ -75,7 +117,25 @@ const TicketFormPage = async ({
         </>
       );
     }
-    return <TicketForm customer={customerWithTicket} ticket={ticket} />;
+    if (isManager) {
+      return (
+        <TicketForm
+          customer={customerWithTicket}
+          ticket={ticket}
+          techs={techs}
+        />
+      );
+    } else {
+      const isEditable =
+        currentUser?.email?.toLowerCase() === ticket.tech.toLowerCase();
+      return (
+        <TicketForm
+          customer={customerWithTicket}
+          ticket={ticket}
+          isEditable={isEditable}
+        />
+      );
+    }
   }
 };
 

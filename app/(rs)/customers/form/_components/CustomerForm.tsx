@@ -19,7 +19,6 @@ type Props = {
 const CustomerForm = ({ customer }: Props) => {
   const { getPermission, isLoading } = useKindeBrowserClient();
   const isManager = !isLoading && getPermission("manager")?.isGranted;
-  console.log({ isManager });
 
   const defaultValues: z.infer<typeof insertCustomerSchema> = {
     id: customer?.id ?? 0,
@@ -49,7 +48,7 @@ const CustomerForm = ({ customer }: Props) => {
     <div className="flex flex-col gap-1 sm:px-8">
       <div>
         <h2 className="text-2xl font-bold">
-          {customer?.id ? "Editar" : "Nuevo"} formulario de cliente
+          Formulario para {customer?.id ? "editar" : "nuevo"} cliente{" "}
           {customer?.id && `#${customer.id}`}
         </h2>
       </div>
@@ -172,7 +171,7 @@ const CustomerForm = ({ customer }: Props) => {
           />
           {isLoading ? (
             <p>Loading...</p>
-          ) : isManager ? (
+          ) : isManager && customer?.id ? (
             <Controller
               name="active"
               control={form.control}

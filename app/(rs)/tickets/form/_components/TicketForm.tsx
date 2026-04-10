@@ -1,22 +1,29 @@
 "use client";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertTicketSchema } from "@/zod-schemas/ticket";
 import z from "zod/v4";
+import { insertTicketSchema } from "@/zod-schemas/ticket";
 import { FieldGroup } from "@/components/ui/field";
-
 import InputField from "@/components/inputs/InputField";
 import TextArea from "@/components/inputs/TextArea";
-import { insertCustomerSchema } from "@/zod-schemas/customer";
 import { Button } from "@/components/ui/button";
 import CheckBoxInput from "@/components/inputs/CheckBoxInput";
+import { insertCustomerSchema } from "@/zod-schemas/customer";
+import SelectInputField from "@/components/inputs/SelectInputField";
 
 type Props = {
   ticket?: z.infer<typeof insertTicketSchema>;
   customer: z.infer<typeof insertCustomerSchema>;
+  techs?: {
+    id: string;
+    description: string;
+  }[];
+  isEditable?: boolean;
 };
 
-const TicketForm = ({ customer, ticket }: Props) => {
+const TicketForm = ({ customer, ticket, techs, isEditable = true }: Props) => {
+  const isManager = Array.isArray(techs);
+
   const defaultValues: z.infer<typeof insertTicketSchema> = {
     id: ticket?.id ?? "(Nuevo)",
     customerId: ticket?.customerId ?? customer.id,
@@ -40,8 +47,11 @@ const TicketForm = ({ customer, ticket }: Props) => {
     <div className="flex flex-col gap-1 sm:px-8">
       <div>
         <h2 className="text-2xl font-bold">
-          {ticket?.id ? "Editar" : "Nuevo"} Formulario de ticket{" "}
-          {ticket?.id && `#${ticket.id}`}
+          {ticket?.id && isEditable
+            ? `Editar ticket #${ticket.id}`
+            : ticket?.id
+              ? `Ver ticket #${ticket.id}`
+              : "Nuevo ticket"}
         </h2>
       </div>
 
@@ -60,22 +70,45 @@ const TicketForm = ({ customer, ticket }: Props) => {
                 fieldState={fieldState}
                 label="Título"
                 placeholder="Ingresa el título"
+                disabled={!isEditable}
               />
             )}
           />
-          <Controller
-            name="tech"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <InputField
-                field={field}
-                fieldState={fieldState}
-                label="Asignado a"
-                placeholder="Ingresa email de personal asignado"
-                disabled={true}
-              />
-            )}
-          />
+          {isManager ? (
+            <Controller
+              name="tech"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <SelectInputField
+                  field={field}
+                  fieldState={fieldState}
+                  label="Asignar ticket"
+                  dataArray={[
+                    {
+                      id: "new-ticket@example.com",
+                      description: "new-ticket@example.com",
+                    },
+                    ...techs,
+                  ]}
+                />
+              )}
+            />
+          ) : (
+            <Controller
+              name="tech"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <InputField
+                  field={field}
+                  fieldState={fieldState}
+                  label="Asignado a"
+                  placeholder="Ingresa email de personal asignado"
+                  disabled={true}
+                />
+              )}
+            />
+          )}
+
           <div className="mt-4 space-y-2">
             <h3 className="text-lg">Información del cliente</h3>
             <hr className="w-4/5" />
@@ -103,41 +136,46 @@ const TicketForm = ({ customer, ticket }: Props) => {
                 fieldState={fieldState}
                 label="Descripción"
                 className="h-96"
+                disabled={!isEditable}
               />
             )}
           />
 
-          <Controller
-            name="completed"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <CheckBoxInput
-                field={field}
-                fieldState={fieldState}
-                label="Estado"
-                message="¿Ticket completado?"
-              />
-            )}
-          />
-
-          <div className="flex gap-2">
-            <Button
-              type="submit"
-              className="w-3/4"
-              variant="default"
-              title="Guardar"
-            >
-              Guardar
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              title="Reset"
-              onClick={() => form.reset(defaultValues)}
-            >
-              Limpiar
-            </Button>
-          </div>
+          {ticket?.id ? (
+            <Controller
+              name="completed"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <CheckBoxInput
+                  field={field}
+                  fieldState={fieldState}
+                  label="Estado"
+                  message="¿Ticket completado?"
+                  disabled={!isEditable}
+                />
+              )}
+            />
+          ) : null}
+          {isEditable ? (
+            <div className="flex gap-2">
+              <Button
+                type="submit"
+                className="w-3/4"
+                variant="default"
+                title="Guardar"
+              >
+                Guardar
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                title="Reset"
+                onClick={() => form.reset(defaultValues)}
+              >
+                Limpiar
+              </Button>
+            </div>
+          ) : null}
         </FieldGroup>
       </form>
     </div>
