@@ -1,13 +1,15 @@
 "use client";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertCustomerSchema } from "@/zod-schemas/customer";
 import z from "zod/v4";
+import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { FieldGroup } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import InputField from "@/components/inputs/InputField";
 import TextArea from "@/components/inputs/TextArea";
 import SelectInputField from "@/components/inputs/SelectInputField";
+import CheckBoxInput from "@/components/inputs/CheckBoxInput";
+import { insertCustomerSchema } from "@/zod-schemas/customer";
 import { regionsArray } from "@/constants/regionsArray";
 
 type Props = {
@@ -15,8 +17,12 @@ type Props = {
 };
 
 const CustomerForm = ({ customer }: Props) => {
+  const { getPermission, isLoading } = useKindeBrowserClient();
+  const isManager = !isLoading && getPermission("manager")?.isGranted;
+  console.log({ isManager });
+
   const defaultValues: z.infer<typeof insertCustomerSchema> = {
-    id: customer?.id ?? "(Nuevo)",
+    id: customer?.id ?? 0,
     firstName: customer?.firstName ?? "",
     lastName: customer?.lastName ?? "",
     email: customer?.email ?? "",
@@ -26,6 +32,7 @@ const CustomerForm = ({ customer }: Props) => {
     city: customer?.city ?? "",
     region: customer?.region ?? "",
     notes: customer?.notes ?? "",
+    active: customer?.active ?? true,
   };
 
   const form = useForm<z.infer<typeof insertCustomerSchema>>({
@@ -43,6 +50,7 @@ const CustomerForm = ({ customer }: Props) => {
       <div>
         <h2 className="text-2xl font-bold">
           {customer?.id ? "Editar" : "Nuevo"} formulario de cliente
+          {customer?.id && `#${customer.id}`}
         </h2>
       </div>
 
@@ -162,6 +170,23 @@ const CustomerForm = ({ customer }: Props) => {
               />
             )}
           />
+          {isLoading ? (
+            <p>Loading...</p>
+          ) : isManager ? (
+            <Controller
+              name="active"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <CheckBoxInput
+                  field={field}
+                  fieldState={fieldState}
+                  label="Estado"
+                  message="¿Usuario activo?"
+                />
+              )}
+            />
+          ) : null}
+
           <div className="flex gap-2">
             <Button
               type="submit"

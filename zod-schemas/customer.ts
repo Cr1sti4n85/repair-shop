@@ -4,7 +4,7 @@ import { customers } from "@/db/schema";
 import { z } from "zod/v4";
 
 export const insertCustomerSchema = createInsertSchema(customers, {
-  id: z.any(),
+  id: z.number(),
   firstName: (schema) => schema.min(1, "El nombre es obligatorio"),
   lastName: (schema) => schema.min(1, "El apellido es obligatorio"),
   email: z.email("Correo electrónico no válido"),

@@ -115,7 +115,7 @@ const TicketForm = ({ customer, ticket }: Props) => {
                 field={field}
                 fieldState={fieldState}
                 label="Estado"
-                message="Ticket completado"
+                message="¿Ticket completado?"
               />
             )}
           />
