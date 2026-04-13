@@ -2,6 +2,9 @@
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod/v4";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+import { LoaderCircle } from "lucide-react";
 import { insertTicketSchema } from "@/zod-schemas/ticket";
 import { FieldGroup } from "@/components/ui/field";
 import InputField from "@/components/inputs/InputField";
@@ -10,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import CheckBoxInput from "@/components/inputs/CheckBoxInput";
 import { insertCustomerSchema } from "@/zod-schemas/customer";
 import SelectInputField from "@/components/inputs/SelectInputField";
+import { saveTicketAction } from "@/app/actions/saveTicketAction";
+import DisplayServerActionResponse from "@/components/DisplayServerActionResponse";
 
 type Props = {
   ticket?: z.infer<typeof insertTicketSchema>;
@@ -39,12 +44,43 @@ const TicketForm = ({ customer, ticket, techs, isEditable = true }: Props) => {
     defaultValues,
   });
 
+  const {
+    execute: executeSave,
+    result: saveResult,
+    isExecuting: isSaving,
+    reset: resetSaveAction,
+  } = useAction(saveTicketAction, {
+    onSuccess({ data }) {
+      toast("Operación exitosa", {
+        classNames: {
+          toast: "!bg-black/90",
+          title: "!text-white !font-bold text-lg",
+          description: "!text-white text-sm",
+        },
+        description: data?.message,
+        duration: 5000,
+      });
+    },
+    onError({ error }) {
+      toast("Error", {
+        classNames: {
+          toast: "!bg-red-700",
+          title: "!text-black !font-bold text-lg",
+          description: "!text-black text-sm",
+        },
+        description: "No se pudo guardar",
+        duration: 5000,
+      });
+    },
+  });
+
   async function submitForm(data: z.infer<typeof insertTicketSchema>) {
-    console.log({ data });
+    executeSave(data);
   }
 
   return (
     <div className="flex flex-col gap-1 sm:px-8">
+      <DisplayServerActionResponse result={saveResult} />
       <div>
         <h2 className="text-2xl font-bold">
           {ticket?.id && isEditable
@@ -163,14 +199,25 @@ const TicketForm = ({ customer, ticket, techs, isEditable = true }: Props) => {
                 className="w-3/4"
                 variant="default"
                 title="Guardar"
+                disabled={isSaving}
               >
-                Guardar
+                {isSaving ? (
+                  <>
+                    <LoaderCircle className="animate-spin" />
+                    Guardando
+                  </>
+                ) : (
+                  "Guardar"
+                )}
               </Button>
               <Button
                 type="button"
                 variant="destructive"
                 title="Reset"
-                onClick={() => form.reset(defaultValues)}
+                onClick={() => {
+                  form.reset(defaultValues);
+                  resetSaveAction();
+                }}
               >
                 Limpiar
               </Button>

@@ -52,15 +52,17 @@ const CustomerForm = ({ customer }: Props) => {
     reset: resetSaveAction,
   } = useAction(saveCustomerAction, {
     onSuccess({ data }) {
-      toast("Operación exitosa", {
-        classNames: {
-          toast: "!bg-black/90",
-          title: "!text-white !font-bold text-lg",
-          description: "!text-white text-sm",
-        },
-        description: data?.message,
-        duration: 5000,
-      });
+      if (data?.message) {
+        toast("Operación exitosa", {
+          classNames: {
+            toast: "!bg-black/90",
+            title: "!text-white !font-bold text-lg",
+            description: "!text-white text-sm",
+          },
+          description: data?.message,
+          duration: 5000,
+        });
+      }
     },
     onError({ error }) {
       toast("Error", {
