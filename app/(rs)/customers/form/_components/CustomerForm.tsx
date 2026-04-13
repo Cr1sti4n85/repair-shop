@@ -48,7 +48,7 @@ const CustomerForm = ({ customer }: Props) => {
   const {
     execute: executeSave,
     result: saveResult,
-    isExecuting: isSaving,
+    isPending: isSaving,
     reset: resetSaveAction,
   } = useAction(saveCustomerAction, {
     onSuccess({ data }) {
