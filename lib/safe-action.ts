@@ -17,8 +17,11 @@ export const actionClient = createSafeActionClient({
       scope.setContext("clientInput", { clientInput });
       return scope;
     });
-    if (error.constructor.name === "DatabaseError") {
-      return "Database error: Los datos no se guardaron";
+    if (
+      error.constructor.name === "DrizzleQueryError" ||
+      error.constructor.name === "NeonDbError"
+    ) {
+      return "Database error: Los datos no se guardaron. Se notificará a soporte.";
     }
     return error.message;
   },
