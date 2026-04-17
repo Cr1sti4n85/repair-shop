@@ -1,5 +1,6 @@
 import CustomerSearch from "./CustomerSearch";
 import { getCustomerSearchResults } from "@/lib/queries/getCustomerSearchResults";
+import CustomerTable from "./CustomerTable";
 
 export const metadata = {
   title: "Búsqueda de clientes",
@@ -14,13 +15,16 @@ const Customers = async ({
   if (!searchText) {
     return <CustomerSearch />;
   }
-  //  query db
+
   const results = await getCustomerSearchResults(searchText);
-  console.log(results);
   return (
     <>
       <CustomerSearch />
-      <p>{JSON.stringify(results)}</p>
+      {results.length ? (
+        <CustomerTable data={results} />
+      ) : (
+        <p className="mt-4">No hay resultados</p>
+      )}
     </>
   );
 };

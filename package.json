@@ -19,6 +19,7 @@
     "@kinde/management-api-js": "^0.16.0",
     "@neondatabase/serverless": "^1.0.2",
     "@sentry/nextjs": "^10.47.0",
+    "@tanstack/react-table": "^8.21.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",
