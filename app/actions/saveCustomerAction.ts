@@ -33,7 +33,7 @@ export const saveCustomerAction = actionClient
           .values({
             firstName: customer.firstName,
             lastName: customer.lastName,
-            email: customer.email,
+            email: customer.email.toLowerCase(),
             phone: customer.phone,
             address1: customer.address1,
             ...(customer.address2?.trim()
@@ -58,7 +58,7 @@ export const saveCustomerAction = actionClient
         .set({
           firstName: customer.firstName,
           lastName: customer.lastName,
-          email: customer.email,
+          email: customer.email.toLowerCase(),
           phone: customer.phone,
           address1: customer.address1,
           address2: customer.address2?.trim() ?? null,
