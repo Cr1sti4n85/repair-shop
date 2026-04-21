@@ -18,7 +18,11 @@ const Tickets = async ({
     return (
       <>
         <TicketSearch />
-        {results.length ? <TicketTable data={results} /> : null}
+        {results.length ? (
+          <TicketTable data={results} />
+        ) : (
+          <p className="mt-4">No hay tickets abiertos</p>
+        )}
       </>
     );
   }
@@ -26,7 +30,11 @@ const Tickets = async ({
   return (
     <>
       <TicketSearch />
-      {results.length ? <TicketTable data={results} /> : null}
+      {results.length ? (
+        <TicketTable data={results} />
+      ) : (
+        <p className="mt-4">No hay resultados</p>
+      )}
     </>
   );
 };
