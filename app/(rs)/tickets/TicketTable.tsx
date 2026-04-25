@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   createColumnHelper,
   flexRender,
@@ -19,7 +19,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CircleCheckIcon, CircleXIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { usePolling } from "@/hooks/usePolling";
 import { TicketSearchResultsType } from "@/lib/queries/getTicketSearchResults";
 import { Button } from "@/components/ui/button";
 import Filter from "@/components/react-table/Filter";
@@ -32,7 +33,14 @@ type RowType = TicketSearchResultsType[0];
 
 const TicketTable = ({ data }: Props) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  usePolling(60000, searchParams.get("searchText"));
+
+  const pageIndex = useMemo(() => {
+    const page = searchParams.get("page");
+    return page ? parseInt(page) - 1 : 0;
+  }, [searchParams]);
 
   const columnHelper = createColumnHelper<RowType>();
 
@@ -87,9 +95,8 @@ const TicketTable = ({ data }: Props) => {
     columns,
     state: {
       columnFilters,
-    },
-    initialState: {
       pagination: {
+        pageIndex,
         pageSize: 10,
       },
     },
@@ -145,33 +152,54 @@ const TicketTable = ({ data }: Props) => {
           </TableBody>
         </Table>
       </div>
-      <div className="flex justify-between items-center">
-        <div className="flex basis-1/3 items-center">
+      <div className="flex justify-between items-center gap-1 flex-wrap">
+        <div>
           <p className="font-bold whitespace-nowrap">
             {`Página ${table.getState().pagination.pageIndex + 1} de ${table.getPageCount()}`}
             &nbsp;&nbsp;
             {`[${table.getFilteredRowModel().rows.length} resultado(s)]`}
           </p>
         </div>
-        <div className="space-x-1">
-          <Button variant="outline" onClick={() => table.resetColumnFilters()}>
-            Limpiar filtros
-          </Button>
-
-          <Button
-            variant="outline"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Anterior
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Siguiente
-          </Button>
+        <div className="flex flex-row gap-1">
+          <div className="flex flex-row gap-1">
+            <Button variant="outline" onClick={() => router.refresh()}>
+              Actualizar tabla
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => table.resetColumnFilters()}
+            >
+              Limpiar filtros
+            </Button>
+          </div>
+          <div className="flex flex-row gap-1">
+            <Button
+              variant="outline"
+              onClick={() => {
+                const newIndex = table.getState().pagination.pageIndex - 1;
+                table.setPageIndex(newIndex);
+                const params = new URLSearchParams(searchParams.toString());
+                params.set("page", (newIndex + 1).toString());
+                router.replace(`?${params.toString()}`, { scroll: false });
+              }}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                const newIndex = table.getState().pagination.pageIndex + 1;
+                table.setPageIndex(newIndex);
+                const params = new URLSearchParams(searchParams.toString());
+                params.set("page", (newIndex + 1).toString());
+                router.replace(`?${params.toString()}`, { scroll: false });
+              }}
+              disabled={!table.getCanNextPage()}
+            >
+              Siguiente
+            </Button>
+          </div>
         </div>
       </div>
     </div>
