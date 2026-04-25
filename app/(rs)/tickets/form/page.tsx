@@ -46,8 +46,8 @@ const TicketFormPage = async ({
         const { users } = await Users.getUsers();
         techs = users
           ? users.map((user) => ({
-              id: user.email!,
-              description: user.email!,
+              id: user.email!.toLowerCase(),
+              description: user.email!.toLowerCase(),
             }))
           : [];
       }

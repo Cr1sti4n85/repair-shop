@@ -35,7 +35,7 @@ const TicketForm = ({ customer, ticket, techs, isEditable = true }: Props) => {
     title: ticket?.title ?? "",
     description: ticket?.description ?? "",
     completed: ticket?.completed ?? false,
-    tech: ticket?.tech ?? "new-ticket@example.com",
+    tech: ticket?.tech.toLowerCase() ?? "new-ticket@example.com",
   };
 
   const form = useForm<z.infer<typeof insertTicketSchema>>({

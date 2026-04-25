@@ -42,10 +42,19 @@ const TicketTable = ({ data }: Props) => {
     return page ? parseInt(page) - 1 : 0;
   }, [searchParams]);
 
+  const columnWidths = {
+    completed: 150,
+    ticketDate: 150,
+    title: 250,
+    tech: 225,
+    email: 225,
+  };
+
   const columnHelper = createColumnHelper<RowType>();
 
   const columns = [
     columnHelper.accessor("ticketDate", {
+      size: columnWidths.ticketDate,
       header: "Fecha",
       cell: ({ getValue }) =>
         new Date(getValue()).toLocaleDateString("es-CL", {
@@ -55,9 +64,11 @@ const TicketTable = ({ data }: Props) => {
         }),
     }),
     columnHelper.accessor("title", {
+      size: columnWidths.title,
       header: "Título",
     }),
     columnHelper.accessor("tech", {
+      size: columnWidths.tech,
       header: "Técnico",
     }),
     columnHelper.accessor("firstName", {
@@ -67,6 +78,7 @@ const TicketTable = ({ data }: Props) => {
       header: "Apellido",
     }),
     columnHelper.accessor("email", {
+      size: columnWidths.email,
       header: "Email",
     }),
     columnHelper.accessor(
@@ -74,6 +86,7 @@ const TicketTable = ({ data }: Props) => {
         return row.completed ? "COMPLETADO" : "ABIERTO";
       },
       {
+        size: columnWidths.completed,
         header: "Estado",
         cell: ({ getValue }) => {
           const value = getValue();
@@ -114,7 +127,11 @@ const TicketTable = ({ data }: Props) => {
             {table.getHeaderGroups().map((hg) => (
               <TableRow key={hg.id}>
                 {hg.headers.map((header) => (
-                  <TableHead key={header.id} className="bg-secondary p-1">
+                  <TableHead
+                    key={header.id}
+                    className="bg-secondary p-1"
+                    style={{ width: header.getSize() }}
+                  >
                     <div>
                       {header.isPlaceholder
                         ? null
@@ -125,7 +142,12 @@ const TicketTable = ({ data }: Props) => {
                     </div>
                     {header.column.getCanFilter() ? (
                       <div className="grid place-content-center">
-                        <Filter column={header.column} />
+                        <Filter
+                          column={header.column}
+                          filteredRows={table
+                            .getFilteredRowModel()
+                            .rows.map((row) => row.getValue(header.column.id))}
+                        />
                       </div>
                     ) : null}
                   </TableHead>
