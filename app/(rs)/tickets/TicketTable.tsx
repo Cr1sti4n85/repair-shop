@@ -35,7 +35,7 @@ const TicketTable = ({ data }: Props) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  usePolling(10000, searchParams.get("searchText"));
+  usePolling(60000, searchParams.get("searchText"));
 
   const pageIndex = useMemo(() => {
     const page = searchParams.get("page");
