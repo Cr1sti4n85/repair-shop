@@ -15,6 +15,7 @@ export async function getCustomerSearchResults(searchtext: string) {
         ilike(customers.city, `%${searchtext}%`),
         sql`lower(concat(${customers.firstName}, ' ', ${customers.lastName})) LIKE ${`%${searchtext.toLocaleLowerCase().replace(" ", "%")}%`}`,
       ),
-    );
+    )
+    .orderBy(customers.lastName);
   return results;
 }
