@@ -24,11 +24,16 @@ type Props = {
     description: string;
   }[];
   isEditable?: boolean;
+  isManager?: boolean | undefined;
 };
 
-const TicketForm = ({ customer, ticket, techs, isEditable = true }: Props) => {
-  const isManager = Array.isArray(techs);
-
+const TicketForm = ({
+  customer,
+  ticket,
+  techs,
+  isEditable = true,
+  isManager = false,
+}: Props) => {
   const defaultValues: z.infer<typeof insertTicketSchema> = {
     id: ticket?.id ?? "(Nuevo)",
     customerId: ticket?.customerId ?? customer.id,
@@ -112,7 +117,7 @@ const TicketForm = ({ customer, ticket, techs, isEditable = true }: Props) => {
               />
             )}
           />
-          {isManager ? (
+          {isManager && techs ? (
             <Controller
               name="tech"
               control={form.control}
