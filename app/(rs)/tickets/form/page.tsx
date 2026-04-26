@@ -101,7 +101,9 @@ const TicketFormPage = async ({
       );
     }
     if (isManager) {
-      return <TicketForm customer={customer} techs={techs} />;
+      return (
+        <TicketForm customer={customer} techs={techs} isManager={isManager} />
+      );
     } else {
       return <TicketForm customer={customer} />;
     }
@@ -123,6 +125,7 @@ const TicketFormPage = async ({
           customer={customerWithTicket}
           ticket={ticket}
           techs={techs}
+          isManager={isManager}
         />
       );
     } else {
