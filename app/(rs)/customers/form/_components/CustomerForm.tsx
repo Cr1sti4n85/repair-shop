@@ -3,7 +3,6 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod/v4";
 import { useAction } from "next-safe-action/hooks";
-import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
 import { saveCustomerAction } from "@/app/actions/saveCustomerAction";
@@ -19,12 +18,10 @@ import { regionsArray } from "@/constants/regionsArray";
 
 type Props = {
   customer?: z.infer<typeof insertCustomerSchema>;
+  isManager?: boolean;
 };
 
-const CustomerForm = ({ customer }: Props) => {
-  const { getPermission, isLoading } = useKindeBrowserClient();
-  const isManager = !isLoading && getPermission("manager")?.isGranted;
-
+const CustomerForm = ({ customer, isManager = false }: Props) => {
   const defaultValues: z.infer<typeof insertCustomerSchema> = {
     id: customer?.id ?? 0,
     firstName: customer?.firstName ?? "",
@@ -207,9 +204,7 @@ const CustomerForm = ({ customer }: Props) => {
               />
             )}
           />
-          {isLoading ? (
-            <p>Loading...</p>
-          ) : isManager && customer?.id ? (
+          {isManager && customer?.id ? (
             <Controller
               name="active"
               control={form.control}
