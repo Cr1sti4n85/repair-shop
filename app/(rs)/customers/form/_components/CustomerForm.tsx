@@ -3,6 +3,8 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod/v4";
 import { useAction } from "next-safe-action/hooks";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
 import { saveCustomerAction } from "@/app/actions/saveCustomerAction";
@@ -22,25 +24,48 @@ type Props = {
 };
 
 const CustomerForm = ({ customer, isManager = false }: Props) => {
-  const defaultValues: z.infer<typeof insertCustomerSchema> = {
-    id: customer?.id ?? 0,
-    firstName: customer?.firstName ?? "",
-    lastName: customer?.lastName ?? "",
-    email: customer?.email ?? "",
-    phone: customer?.phone ?? "",
-    address1: customer?.address1 ?? "",
-    address2: customer?.address2 ?? "",
-    city: customer?.city ?? "",
-    region: customer?.region ?? "",
-    notes: customer?.notes ?? "",
-    active: customer?.active ?? true,
+  const searchParams = useSearchParams();
+  const hasCustomerId = searchParams.has("customerId");
+
+  const emptyValues: z.infer<typeof insertCustomerSchema> = {
+    id: 0,
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address1: "",
+    address2: "",
+    city: "",
+    region: "",
+    notes: "",
+    active: true,
   };
+
+  const defaultValues: z.infer<typeof insertCustomerSchema> = hasCustomerId
+    ? {
+        id: customer?.id ?? 0,
+        firstName: customer?.firstName ?? "",
+        lastName: customer?.lastName ?? "",
+        email: customer?.email ?? "",
+        phone: customer?.phone ?? "",
+        address1: customer?.address1 ?? "",
+        address2: customer?.address2 ?? "",
+        city: customer?.city ?? "",
+        region: customer?.region ?? "",
+        notes: customer?.notes ?? "",
+        active: customer?.active ?? true,
+      }
+    : emptyValues;
 
   const form = useForm<z.infer<typeof insertCustomerSchema>>({
     mode: "onBlur",
     resolver: zodResolver(insertCustomerSchema),
     defaultValues,
   });
+
+  useEffect(() => {
+    form.reset(hasCustomerId ? defaultValues : emptyValues);
+  }, [hasCustomerId, customer, form]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const {
     execute: executeSave,
