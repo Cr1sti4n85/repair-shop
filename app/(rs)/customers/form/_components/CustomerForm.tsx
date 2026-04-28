@@ -3,7 +3,8 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod/v4";
 import { useAction } from "next-safe-action/hooks";
-import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
 import { saveCustomerAction } from "@/app/actions/saveCustomerAction";
@@ -19,31 +20,52 @@ import { regionsArray } from "@/constants/regionsArray";
 
 type Props = {
   customer?: z.infer<typeof insertCustomerSchema>;
+  isManager?: boolean;
 };
 
-const CustomerForm = ({ customer }: Props) => {
-  const { getPermission, isLoading } = useKindeBrowserClient();
-  const isManager = !isLoading && getPermission("manager")?.isGranted;
+const CustomerForm = ({ customer, isManager = false }: Props) => {
+  const searchParams = useSearchParams();
+  const hasCustomerId = searchParams.has("customerId");
 
-  const defaultValues: z.infer<typeof insertCustomerSchema> = {
-    id: customer?.id ?? 0,
-    firstName: customer?.firstName ?? "",
-    lastName: customer?.lastName ?? "",
-    email: customer?.email ?? "",
-    phone: customer?.phone ?? "",
-    address1: customer?.address1 ?? "",
-    address2: customer?.address2 ?? "",
-    city: customer?.city ?? "",
-    region: customer?.region ?? "",
-    notes: customer?.notes ?? "",
-    active: customer?.active ?? true,
+  const emptyValues: z.infer<typeof insertCustomerSchema> = {
+    id: 0,
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address1: "",
+    address2: "",
+    city: "",
+    region: "",
+    notes: "",
+    active: true,
   };
+
+  const defaultValues: z.infer<typeof insertCustomerSchema> = hasCustomerId
+    ? {
+        id: customer?.id ?? 0,
+        firstName: customer?.firstName ?? "",
+        lastName: customer?.lastName ?? "",
+        email: customer?.email ?? "",
+        phone: customer?.phone ?? "",
+        address1: customer?.address1 ?? "",
+        address2: customer?.address2 ?? "",
+        city: customer?.city ?? "",
+        region: customer?.region ?? "",
+        notes: customer?.notes ?? "",
+        active: customer?.active ?? true,
+      }
+    : emptyValues;
 
   const form = useForm<z.infer<typeof insertCustomerSchema>>({
     mode: "onBlur",
     resolver: zodResolver(insertCustomerSchema),
     defaultValues,
   });
+
+  useEffect(() => {
+    form.reset(hasCustomerId ? defaultValues : emptyValues);
+  }, [hasCustomerId, customer, form]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const {
     execute: executeSave,
@@ -207,9 +229,7 @@ const CustomerForm = ({ customer }: Props) => {
               />
             )}
           />
-          {isLoading ? (
-            <p>Loading...</p>
-          ) : isManager && customer?.id ? (
+          {isManager && customer?.id ? (
             <Controller
               name="active"
               control={form.control}
