@@ -31,7 +31,10 @@ const InputField = <
   disabled,
 }: Props<TFieldValues, TName>) => {
   return (
-    <Field data-invalid={fieldState.invalid}>
+    <Field
+      data-invalid={fieldState.invalid}
+      className={disabled ? "cursor-not-allowed" : ""}
+    >
       <FieldLabel htmlFor="form-input">{label}</FieldLabel>
       <Input
         {...field}

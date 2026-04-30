@@ -10,6 +10,7 @@ const CustomerSearch = () => {
         name="searchText"
         type="text"
         placeholder="Buscar clientes"
+        autoFocus
       />
       <SearchButton />
     </Form>
