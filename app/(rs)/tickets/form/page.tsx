@@ -1,0 +1,145 @@
+import * as Sentry from "@sentry/nextjs";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { Users, init as kindeInit } from "@kinde/management-api-js";
+import BackButton from "@/components/BackButton";
+import { getCustomer } from "@/lib/queries/getCustomer";
+import { getTicket } from "@/lib/queries/getTicket";
+import TicketForm from "./_components/TicketForm";
+import { KindeUser } from "@kinde-oss/kinde-auth-nextjs";
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+}) {
+  const { customerId, ticketId } = await searchParams;
+  if (!customerId && !ticketId)
+    return { title: "Falta Id de cliente o de ticket" };
+  if (customerId) return { title: `Nuevo ticket para cliente #${customerId}` };
+  return { title: `Editar ticket #${ticketId}` };
+}
+
+const TicketFormPage = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+}) => {
+  const { customerId, ticketId } = await searchParams;
+  let customer = null;
+  let ticket = null;
+  let customerWithTicket = null;
+  let isManager: boolean | undefined = false;
+  let currentUser: KindeUser<Record<string, unknown>> | null = null;
+  let techs: { id: string; description: string }[] = [];
+  const { getPermission, getUser } = getKindeServerSession();
+
+  try {
+    if (customerId || ticketId) {
+      const [managerPermission, user] = await Promise.all([
+        getPermission("manager"),
+        getUser(),
+      ]);
+      isManager = managerPermission?.isGranted;
+      currentUser = user;
+      if (isManager) {
+        kindeInit();
+        const { users } = await Users.getUsers();
+        techs = users
+          ? users.map((user) => ({
+              id: user.email!.toLowerCase(),
+              description: user.email!.toLowerCase(),
+            }))
+          : [];
+      }
+    }
+
+    if (customerId) {
+      customer = await getCustomer(parseInt(customerId));
+    }
+    if (ticketId) {
+      ticket = await getTicket(parseInt(ticketId));
+      if (ticket) {
+        customerWithTicket = await getCustomer(ticket.customerId);
+      }
+    }
+  } catch (err) {
+    if (err instanceof Error) {
+      Sentry.captureException(err);
+      throw err;
+    }
+  }
+
+  if (!customerId && !ticketId) {
+    return (
+      <>
+        <h2 className="text-2xl mb-2">
+          Se necesita ID de cliente o ID de ticket para cargar el formulario
+        </h2>
+        <BackButton title="Volver" variant={"default"} />
+      </>
+    );
+  }
+
+  //New ticket form
+  if (customerId) {
+    if (!customer) {
+      return (
+        <>
+          <h2 className="text-2xl mb-2">Cliente #{customerId} no encontrado</h2>
+          <BackButton title="Volver" variant={"default"} />
+        </>
+      );
+    }
+    if (!customer.active) {
+      return (
+        <>
+          <h2 className="text-2xl mb-2">
+            El cliente #{customerId} no está activo
+          </h2>
+          <BackButton title="Volver" variant={"default"} />
+        </>
+      );
+    }
+    if (isManager) {
+      return (
+        <TicketForm customer={customer} techs={techs} isManager={isManager} />
+      );
+    } else {
+      return <TicketForm customer={customer} />;
+    }
+  }
+
+  //Edit ticket
+  if (ticketId) {
+    if (!ticket || !customerWithTicket) {
+      return (
+        <>
+          <h2 className="text-2xl mb-2">Ticket #{ticketId} no encontrado</h2>
+          <BackButton title="Volver" variant={"default"} />
+        </>
+      );
+    }
+    if (isManager) {
+      return (
+        <TicketForm
+          customer={customerWithTicket}
+          ticket={ticket}
+          techs={techs}
+          isManager={isManager}
+        />
+      );
+    } else {
+      const isEditable =
+        currentUser?.email?.toLowerCase() === ticket.tech.toLowerCase();
+      return (
+        <TicketForm
+          customer={customerWithTicket}
+          ticket={ticket}
+          isEditable={isEditable}
+        />
+      );
+    }
+  }
+};
+
+export default TicketFormPage;

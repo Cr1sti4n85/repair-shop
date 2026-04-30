@@ -1,0 +1,17 @@
+export const regionsArray = [
+  { id: "I", description: "I Región" },
+  { id: "II", description: "II Región" },
+  { id: "III", description: "III Región" },
+  { id: "IV", description: "IV Región" },
+  { id: "V", description: "V Región" },
+  { id: "RM", description: "Región Metropolitana" },
+  { id: "VI", description: "VI Región" },
+  { id: "VII", description: "VII Región" },
+  { id: "VIII", description: "VIII Región" },
+  { id: "IX", description: "IX Región" },
+  { id: "X", description: "X Región" },
+  { id: "XI", description: "XI Región" },
+  { id: "XII", description: "XII Región" },
+  { id: "XIV", description: "XIV Región" },
+  { id: "XV", description: "XV Región" },
+];
